@@ -1,10 +1,12 @@
-import numpy as pd 
+import numpy as np
 from si.data.dataset import Dataset
 
-def read_data_file(filename: str, sep: str = ',', label: bool = False) -> Dataset:
+
+def read_data_file(filename: str, sep: str = None, label: bool = False) -> Dataset:
     """
-    Lê ficheiro genético e volta Dataset
+    Lê um ficheiro e devolve um Dataset.
     """
+
     raw_data = np.genfromtxt(filename, delimiter=sep)
 
     if label:
@@ -14,15 +16,20 @@ def read_data_file(filename: str, sep: str = ',', label: bool = False) -> Datase
         X = raw_data
         y = None
 
-    #Dataset com dados separados
     return Dataset(X=X, y=y)
 
-def write_data_file(filename: str, dataset: Dataset, sep: str = ',', label: bool = False) -> None:
 
-    if label and dataset.y is not None:
-        # se gurdar com label junta matriz X e vetor y
-        data_to_save = np.column_stack((dataset.X, dataset.y))
+def write_data_file(filename: str, dataset: Dataset, sep: str = None, label: bool = False) -> None:
+    """
+    Guarda os dados de um Dataset num ficheiro DATA.
+    """
+
+    if sep is None:
+        sep = " "
+
+    if label:
+        data = np.column_stack((dataset.X, dataset.y))
     else:
-        # se não guarda só matiz
-        data_to_save = dataset.X
-    np.savetxt(filename, data_to_save, delimiter=sep)
+        data = dataset.X
+
+    np.savetxt(filename, data, delimiter=sep)

@@ -4,10 +4,15 @@ from si.base.transformer import Transformer
 
 class VarianceThreshold(Transformer):
     """
-    Seleciona as características (features) cuja variância é superior a um determinado threshold
+    Seleciona características com variância superior ao threshold.
     """
+
     def __init__(self, threshold: float = 0.0, **kwargs):
         super().__init__(**kwargs)
+
+        if threshold < 0:
+            raise ValueError("Threshold must be non-negative")
+
         self.threshold = threshold
         self.variance = None
 
