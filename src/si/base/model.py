@@ -33,7 +33,7 @@ class Model(Estimator, ABC):
         predictions: np.ndarray
             The predicted target values.
         """
-        if not self.is_fitted:
+        if not self.is_fitted ():
             raise ValueError('Model needs to be fitted before calling predict()')
         return self._predict(dataset)
 
@@ -69,26 +69,19 @@ class Model(Estimator, ABC):
         predictions: np.ndarray
             The predicted target values.
         """
+
         self.fit(dataset)
         return self.predict(dataset)
 
-        @abstractmethod
-        def _score(self, dataset: Dataset, predictions: np.ndarray) -> float:
-            """
-            Calcula a pontuação do modelo.
-            """
-            pass
+    @abstractmethod
+    def _score(self, dataset: Dataset, predictions: np.ndarray) -> float:
+        pass
 
-        def score(self, dataset: Dataset) -> float:
-            """
-            Avalia o desempenho do modelo.
-            """
-
-            if self.is_fitted():
-                predictions = self.predict(dataset=dataset)
-                return float(self._score(dataset, predictions=predictions))
-
-            else:
-                raise ValueError(
-                    "Your model is not fitted, please call method.fit"
-                )
+    def score(self, dataset: Dataset) -> float:
+        if self.is_fitted():
+            predictions = self.predict(dataset=dataset)
+            return float(self._score(dataset, predictions=predictions))
+        else:
+            raise ValueError(
+                "Your model is not fitted, please call method.fit"
+            )

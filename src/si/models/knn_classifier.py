@@ -53,12 +53,5 @@ class KNNClassifier(Model):
         # 5. array de previsões
         return np.array(predictions)
 
-    def _score(self, dataset: Dataset) -> float:
-        """
-        accuracy
-        """
-        # 1. previsões
-        predictions = self.predict(dataset)
-        
-        # 2. precisão entre os valores reais e as previsões
+    def _score(self, dataset: Dataset, predictions: np.ndarray) -> float:
         return accuracy(dataset.y, predictions)
