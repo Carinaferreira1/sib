@@ -75,58 +75,44 @@ class DenseLayer(Layer):
     def parameters(self):
         return np.prod(self.weights.shape) + np.prod(self.biases.shape)
 
-class ActivationLayer(Layer):
+class Dropout(Layer):
 
-    def __init__(self, input_shape=None):
+    def __init__(self, probability, input_shape=None):
+        if not 0 <= probability < 1:
+            raise ValueError("Probability must be between 0 and 1")
+
+        self.probability = probability
+        self.mask = None
         self.input = None
         self.output = None
 
         if input_shape is not None:
             self.set_input_shape(input_shape)
 
-    @abstractmethod
-    def activation_function(self, x):
-        pass
-
-    @abstractmethod
-    def derivative(self, x):
-        pass
-
     def forward_propagation(self, input, training=False):
         self.input = input
-        self.output = self.activation_function(input)
+
+        if training:
+            scaling_factor = 1 / (1 - self.probability)
+            self.mask = np.random.binomial(
+                1, 1 - self.probability, size=input.shape
+            )
+            self.output = input * self.mask * scaling_factor
+        else:
+            self.mask = None
+            self.output = input
+
         return self.output
 
     def backward_propagation(self, output_error):
-        return output_error * self.derivative(self.input)
+        if self.mask is None:
+            return output_error
+
+        scaling_factor = 1 / (1 - self.probability)
+        return output_error * self.mask * scaling_factor
 
     def output_shape(self):
         return self.input_shape()
 
     def parameters(self):
         return 0
-
-class Sigmoid(ActivationLayer):
-
-    def activation_function(self, x):
-        return 1 / (1 + np.exp(-x))
-
-    def derivative(self, x):
-        s = self.activation_function(x)
-        return s * (1 - s)
-
-class Tanh(ActivationLayer):
-
-    def activation_function(self, x):
-        return np.tanh(x)
-
-    def derivative(self, x):
-        return 1 - np.tanh(x) ** 2
-
-class ReLU(ActivationLayer):
-
-    def activation_function(self, x):
-        return np.maximum(0, x)
-
-    def derivative(self, x):
-        return (x > 0).astype(float)
