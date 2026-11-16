@@ -1,3 +1,5 @@
+import numpy as np
+import copy
 from abc import ABCMeta, abstractmethod
 
 
@@ -49,8 +51,8 @@ class DenseLayer(Layer):
         self.weights = np.random.rand(n_features, self.n_units) - 0.5
         self.biases = np.zeros((1, self.n_units))
 
-        self.w_opt = optimizer
-        self.b_opt = optimizer
+        self.w_opt = copy.deepcopy(optimizer)
+        self.b_opt = copy.deepcopy(optimizer)
 
         return self
 
@@ -73,8 +75,10 @@ class DenseLayer(Layer):
         return (self.n_units,)
 
     def parameters(self):
-        return np.prod(self.weights.shape) + np.prod(self.biases.shape)
+        if self.weights is None or self.biases is None:
+            return 0
 
+        return np.prod(self.weights.shape) + np.prod(self.biases.shape)
 class Dropout(Layer):
 
     def __init__(self, probability, input_shape=None):
